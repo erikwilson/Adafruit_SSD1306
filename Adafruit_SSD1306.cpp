@@ -28,7 +28,7 @@ All text above, and the splash screen below must be included in any redistributi
 #include "Adafruit_SSD1306.h"
 
 // the memory buffer for the LCD
-
+/*
 static uint8_t buffer[SSD1306_LCDHEIGHT * SSD1306_LCDWIDTH / 8] = { 
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -99,8 +99,10 @@ static uint8_t buffer[SSD1306_LCDHEIGHT * SSD1306_LCDWIDTH / 8] = {
 #endif
 #endif
 };
-
-
+*/
+void Adafruit_SSD1306::setBuffer(uint8_t *newBuff) {
+	buffer = newBuff;
+}
 
 // the most basic function, set a single pixel
 void Adafruit_SSD1306::drawPixel(int16_t x, int16_t y, uint16_t color) {
@@ -126,9 +128,9 @@ void Adafruit_SSD1306::drawPixel(int16_t x, int16_t y, uint16_t color) {
   // x is which column
     switch (color) 
     {
-      case WHITE:   buffer[x+ (y/8)*SSD1306_LCDWIDTH] |=  (1 << (y&7)); break;
-      case BLACK:   buffer[x+ (y/8)*SSD1306_LCDWIDTH] &= ~(1 << (y&7)); break; 
-      case INVERSE: buffer[x+ (y/8)*SSD1306_LCDWIDTH] ^=  (1 << (y&7)); break; 
+      case SSD1306_WHITE:   buffer[x+ (y/8)*SSD1306_LCDWIDTH] |=  (1 << (y&7)); break;
+      case SSD1306_BLACK:   buffer[x+ (y/8)*SSD1306_LCDWIDTH] &= ~(1 << (y&7)); break; 
+      case SSD1306_INVERSE: buffer[x+ (y/8)*SSD1306_LCDWIDTH] ^=  (1 << (y&7)); break; 
     }
     
 }
@@ -395,14 +397,14 @@ void Adafruit_SSD1306::startscrollleft(uint8_t start, uint8_t stop){
 // display.scrollright(0x00, 0x0F) 
 void Adafruit_SSD1306::startscrolldiagright(uint8_t start, uint8_t stop){
   ssd1306_command(SSD1306_SET_VERTICAL_SCROLL_AREA);  
-  ssd1306_command(0X00);
+  ssd1306_command(0X10);
   ssd1306_command(SSD1306_LCDHEIGHT);
   ssd1306_command(SSD1306_VERTICAL_AND_RIGHT_HORIZONTAL_SCROLL);
   ssd1306_command(0X00);
   ssd1306_command(start);
   ssd1306_command(0X00);
   ssd1306_command(stop);
-  ssd1306_command(0X01);
+  ssd1306_command((uint8_t)(SSD1306_LCDHEIGHT)-0x01);
   ssd1306_command(SSD1306_ACTIVATE_SCROLL);
 }
 
@@ -412,14 +414,14 @@ void Adafruit_SSD1306::startscrolldiagright(uint8_t start, uint8_t stop){
 // display.scrollright(0x00, 0x0F) 
 void Adafruit_SSD1306::startscrolldiagleft(uint8_t start, uint8_t stop){
   ssd1306_command(SSD1306_SET_VERTICAL_SCROLL_AREA);  
-  ssd1306_command(0X00);
+  ssd1306_command(0X10);
   ssd1306_command(SSD1306_LCDHEIGHT);
   ssd1306_command(SSD1306_VERTICAL_AND_LEFT_HORIZONTAL_SCROLL);
   ssd1306_command(0X00);
   ssd1306_command(start);
   ssd1306_command(0X00);
   ssd1306_command(stop);
-  ssd1306_command(0X01);
+  ssd1306_command((uint8_t)(SSD1306_LCDHEIGHT)-0x01);
   ssd1306_command(SSD1306_ACTIVATE_SCROLL);
 }
 
@@ -616,9 +618,9 @@ void Adafruit_SSD1306::drawFastHLineInternal(int16_t x, int16_t y, int16_t w, ui
 
   switch (color) 
   {
-  case WHITE:         while(w--) { *pBuf++ |= mask; }; break;
-    case BLACK: mask = ~mask;   while(w--) { *pBuf++ &= mask; }; break;
-  case INVERSE:         while(w--) { *pBuf++ ^= mask; }; break;
+  case SSD1306_WHITE:         while(w--) { *pBuf++ |= mask; }; break;
+  case SSD1306_BLACK: mask = ~mask;   while(w--) { *pBuf++ &= mask; }; break;
+  case SSD1306_INVERSE:         while(w--) { *pBuf++ ^= mask; }; break;
   }
 }
 
@@ -709,9 +711,9 @@ void Adafruit_SSD1306::drawFastVLineInternal(int16_t x, int16_t __y, int16_t __h
 
   switch (color) 
     {
-    case WHITE:   *pBuf |=  mask;  break;
-    case BLACK:   *pBuf &= ~mask;  break;
-    case INVERSE: *pBuf ^=  mask;  break;
+    case SSD1306_WHITE:   *pBuf |=  mask;  break;
+    case SSD1306_BLACK:   *pBuf &= ~mask;  break;
+    case SSD1306_INVERSE: *pBuf ^=  mask;  break;
     }
   
     // fast exit if we're done here!
@@ -725,7 +727,7 @@ void Adafruit_SSD1306::drawFastVLineInternal(int16_t x, int16_t __y, int16_t __h
 
   // write solid bytes while we can - effectively doing 8 rows at a time
   if(h >= 8) { 
-    if (color == INVERSE)  {          // separate copy of the code so we don't impact performance of the black/white write version with an extra comparison per loop
+    if (color == SSD1306_INVERSE)  {          // separate copy of the code so we don't impact performance of the SSD1306_black/SSD1306_white write version with an extra comparison per loop
       do  {
       *pBuf=~(*pBuf);
 
@@ -738,7 +740,7 @@ void Adafruit_SSD1306::drawFastVLineInternal(int16_t x, int16_t __y, int16_t __h
       }
     else {
       // store a local value to work with 
-      register uint8_t val = (color == WHITE) ? 255 : 0;
+      register uint8_t val = (color == SSD1306_WHITE) ? 255 : 0;
 
       do  {
         // write our value in
@@ -763,9 +765,9 @@ void Adafruit_SSD1306::drawFastVLineInternal(int16_t x, int16_t __y, int16_t __h
     register uint8_t mask = postmask[mod];
     switch (color) 
     {
-      case WHITE:   *pBuf |=  mask;  break;
-      case BLACK:   *pBuf &= ~mask;  break;
-      case INVERSE: *pBuf ^=  mask;  break;
+      case SSD1306_WHITE:   *pBuf |=  mask;  break;
+      case SSD1306_BLACK:   *pBuf &= ~mask;  break;
+      case SSD1306_INVERSE: *pBuf ^=  mask;  break;
     }
   }
 }

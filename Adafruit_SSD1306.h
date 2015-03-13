@@ -35,11 +35,11 @@ All text above, and the splash screen must be included in any redistribution
 #include <SPI.h>
 #include <Adafruit_GFX.h>
 
-#define BLACK 0
-#define WHITE 1
-#define INVERSE 2
+#define SSD1306_BLACK 0
+#define SSD1306_WHITE 1
+#define SSD1306_INVERSE 2
 
-#define SSD1306_I2C_ADDRESS   0x3C	// 011110+SA0+RW - 0x3C or 0x3D
+#define SSD1306_I2C_ADDRESS   0x3D	// 011110+SA0+RW - 0x3C or 0x3D
 // Address for 128x32 is 0x3C
 // Address for 128x64 is 0x3D (default) or 0x3C (if SA0 is grounded)
 
@@ -134,6 +134,8 @@ class Adafruit_SSD1306 : public Adafruit_GFX {
   Adafruit_SSD1306(int8_t DC, int8_t RST, int8_t CS);
   Adafruit_SSD1306(int8_t RST);
 
+  void setBuffer(uint8_t *newBuff);
+
   void begin(uint8_t switchvcc = SSD1306_SWITCHCAPVCC, uint8_t i2caddr = SSD1306_I2C_ADDRESS, bool reset=true);
   void ssd1306_command(uint8_t c);
   void ssd1306_data(uint8_t c);
@@ -157,6 +159,8 @@ class Adafruit_SSD1306 : public Adafruit_GFX {
   virtual void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
 
  private:
+  uint8_t *buffer;
+
   int8_t _i2caddr, _vccstate, sid, sclk, dc, rst, cs;
   void fastSPIwrite(uint8_t c);
 
